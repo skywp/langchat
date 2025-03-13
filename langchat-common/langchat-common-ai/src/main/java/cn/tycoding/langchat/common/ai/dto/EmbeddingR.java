@@ -20,6 +20,9 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 /**
+ * 该类用于封装 Embedding 操作的返回结果。
+ * Embedding 是将文本数据转换为向量表示的过程，此对象存储了相关的关键信息。
+ *
  * @author tycoding
  * @since 2024/4/26
  */
@@ -33,17 +36,20 @@ public class EmbeddingR {
     private String vectorId;
 
     /**
-     * 文档ID
+     * 文档的唯一标识符。
+     * 表明该 Embedding 结果对应的原始文档。
      */
     private String docsId;
 
     /**
-     * 知识库ID
+     * 知识库的唯一标识符。
+     * 指示该 Embedding 结果所属的知识库。
      */
     private String knowledgeId;
 
     /**
-     * Embedding后切片的文本
+     * Embedding 操作后切片的文本内容。
+     * 即原始文本经过处理和 Embedding 操作后，得到的文本片段。
      */
     private String text;
 }

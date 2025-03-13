@@ -21,12 +21,19 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Configuration;
 
 /**
+ * 通用AI自动配置类
+ * 该类用于启用特定的配置属性类，使Spring Boot能够自动加载和绑定配置文件中的属性。
+ * 
  * @author tycoding
  * @since 2024/11/16
  */
 @Configuration
+// 启用指定的配置属性类，将配置文件中的属性绑定到对应的类实例上
 @EnableConfigurationProperties({
+        // 启用ChatProps类，使其能够从配置文件中读取并绑定相关属性
         ChatProps.class,
 })
 public class CommonAiAutoConfiguration {
+    // 该类作为配置类，通常不需要额外的实例方法或成员变量，
+    // 主要通过注解来声明配置信息
 }

@@ -21,6 +21,8 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 /**
+ * 该类用于封装图像生成相关的请求信息。
+ * 
  * @author tycoding
  * @since 2024/1/6
  */
@@ -28,29 +30,43 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class ImageR {
 
+    /**
+     * 模型的唯一标识符
+     */
     private String modelId;
+
+    /**
+     * 模型的名称
+     */
     private String modelName;
+
+    /**
+     * 模型的提供商
+     */
     private String modelProvider;
 
+    /**
+     * 用于生成图像的提示信息
+     */
     private Prompt prompt;
 
     /**
-     * 内容
+     * 图像生成的内容描述
      */
     private String message;
 
     /**
-     * 质量
+     * 生成图像的质量，例如 high、medium、low 等
      */
     private String quality;
 
     /**
-     * 尺寸
+     * 生成图像的尺寸，例如 256x256、512x512 等
      */
     private String size;
 
     /**
-     * 风格
+     * 生成图像的风格，例如 realistic、cartoon 等
      */
     private String style;
 }
