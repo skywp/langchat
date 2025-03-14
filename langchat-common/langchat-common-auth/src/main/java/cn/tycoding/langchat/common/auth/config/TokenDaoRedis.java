@@ -50,6 +50,9 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * TokenDaoRedis 类实现了 SaTokenDao 接口，用于将 Sa-Token 的数据存储到 Redis 中。
+ * 它支持存储字符串和对象类型的数据，并处理数据的读写、过期时间设置等操作。
+ * 
  * @author tycoding
  * @since 2024/1/5
  */
@@ -57,14 +60,22 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class TokenDaoRedis implements SaTokenDao {
 
+    // 日期时间格式化模式
     public static final String DATE_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
+    // 日期格式化模式
     public static final String DATE_PATTERN = "yyyy-MM-dd";
+    // 时间格式化模式
     public static final String TIME_PATTERN = "HH:mm:ss";
+    // 日期时间格式化器
     public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern(DATE_TIME_PATTERN);
+    // 日期格式化器
     public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern(DATE_PATTERN);
+    // 时间格式化器
     public static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern(TIME_PATTERN);
 
+    // Redis 缓存的前缀
     private static final String prefix = CacheConst.AUTH_PREFIX;
+
     /**
      * ObjectMapper 对象 (以 public 作用域暴露出此对象，方便开发者二次更改配置)
      *
@@ -76,24 +87,38 @@ public class TokenDaoRedis implements SaTokenDao {
      * </p>
      */
     public ObjectMapper objectMapper;
+
     /**
-     * String 读写专用
+     * String 读写专用的 Redis 模板
      */
     public StringRedisTemplate stringRedisTemplate;
+
     /**
-     * Object 读写专用
+     * Object 读写专用的 Redis 模板
      */
     public RedisTemplate<String, Object> objectRedisTemplate;
+
     /**
      * 标记：是否已初始化成功
      */
     public boolean isInit;
 
+    /**
+     * 对传入的 key 进行处理，添加统一的前缀
+     *
+     * @param key 原始的 key
+     * @return 添加前缀后的 key
+     */
     private static String sub(String key) {
         int index = StrUtil.ordinalIndexOf(key, ":", 2);
         return prefix + StrUtil.subSuf(key, index + 1);
     }
 
+    /**
+     * 初始化 Redis 相关配置，包括序列化器、ObjectMapper 等
+     *
+     * @param connectionFactory Redis 连接工厂
+     */
     @Autowired
     public void init(RedisConnectionFactory connectionFactory) {
         // 如果已经初始化成功了，就立刻退出，不重复初始化
@@ -158,9 +183,11 @@ public class TokenDaoRedis implements SaTokenDao {
         this.isInit = true;
     }
 
-
     /**
-     * 获取Value，如无返空
+     * 获取指定 key 的字符串值
+     *
+     * @param key 要获取值的 key
+     * @return key 对应的值，如果不存在则返回 null
      */
     @Override
     public String get(String key) {
@@ -169,7 +196,11 @@ public class TokenDaoRedis implements SaTokenDao {
     }
 
     /**
-     * 写入Value，并设定存活时间 (单位: 秒)
+     * 写入字符串值到 Redis 中，并设置存活时间
+     *
+     * @param key     要写入的 key
+     * @param value   要写入的值
+     * @param timeout 存活时间，单位为秒
      */
     @Override
     public void set(String key, String value, long timeout) {
@@ -186,7 +217,10 @@ public class TokenDaoRedis implements SaTokenDao {
     }
 
     /**
-     * 修修改指定key-value键值对 (过期时间不变)
+     * 修改指定 key 的值，过期时间保持不变
+     *
+     * @param key   要修改的 key
+     * @param value 新的值
      */
     @Override
     public void update(String key, String value) {
@@ -200,7 +234,9 @@ public class TokenDaoRedis implements SaTokenDao {
     }
 
     /**
-     * 删除Value
+     * 删除指定 key 的值
+     *
+     * @param key 要删除的 key
      */
     @Override
     public void delete(String key) {
@@ -209,7 +245,10 @@ public class TokenDaoRedis implements SaTokenDao {
     }
 
     /**
-     * 获取Value的剩余存活时间 (单位: 秒)
+     * 获取指定 key 的剩余存活时间
+     *
+     * @param key 要查询的 key
+     * @return 剩余存活时间，单位为秒
      */
     @Override
     public long getTimeout(String key) {
@@ -218,7 +257,10 @@ public class TokenDaoRedis implements SaTokenDao {
     }
 
     /**
-     * 修改Value的剩余存活时间 (单位: 秒)
+     * 修改指定 key 的剩余存活时间
+     *
+     * @param key     要修改的 key
+     * @param timeout 新的存活时间，单位为秒
      */
     @Override
     public void updateTimeout(String key, long timeout) {
@@ -237,9 +279,11 @@ public class TokenDaoRedis implements SaTokenDao {
         stringRedisTemplate.expire(key, timeout, TimeUnit.SECONDS);
     }
 
-
     /**
-     * 获取Object，如无返空
+     * 获取指定 key 的对象值
+     *
+     * @param key 要获取值的 key
+     * @return key 对应的值，如果不存在则返回 null
      */
     @Override
     public Object getObject(String key) {
@@ -248,7 +292,11 @@ public class TokenDaoRedis implements SaTokenDao {
     }
 
     /**
-     * 写入Object，并设定存活时间 (单位: 秒)
+     * 写入对象值到 Redis 中，并设置存活时间
+     *
+     * @param key     要写入的 key
+     * @param object  要写入的对象
+     * @param timeout 存活时间，单位为秒
      */
     @Override
     public void setObject(String key, Object object, long timeout) {
@@ -265,7 +313,10 @@ public class TokenDaoRedis implements SaTokenDao {
     }
 
     /**
-     * 更新Object (过期时间不变)
+     * 修改指定 key 的对象值，过期时间保持不变
+     *
+     * @param key    要修改的 key
+     * @param object 新的对象值
      */
     @Override
     public void updateObject(String key, Object object) {
@@ -279,7 +330,9 @@ public class TokenDaoRedis implements SaTokenDao {
     }
 
     /**
-     * 删除Object
+     * 删除指定 key 的对象值
+     *
+     * @param key 要删除的 key
      */
     @Override
     public void deleteObject(String key) {
@@ -288,7 +341,10 @@ public class TokenDaoRedis implements SaTokenDao {
     }
 
     /**
-     * 获取Object的剩余存活时间 (单位: 秒)
+     * 获取指定 key 的对象值的剩余存活时间
+     *
+     * @param key 要查询的 key
+     * @return 剩余存活时间，单位为秒
      */
     @Override
     public long getObjectTimeout(String key) {
@@ -297,7 +353,10 @@ public class TokenDaoRedis implements SaTokenDao {
     }
 
     /**
-     * 修改Object的剩余存活时间 (单位: 秒)
+     * 修改指定 key 的对象值的剩余存活时间
+     *
+     * @param key     要修改的 key
+     * @param timeout 新的存活时间，单位为秒
      */
     @Override
     public void updateObjectTimeout(String key, long timeout) {
@@ -316,9 +375,15 @@ public class TokenDaoRedis implements SaTokenDao {
         objectRedisTemplate.expire(key, timeout, TimeUnit.SECONDS);
     }
 
-
     /**
-     * 搜索数据
+     * 搜索符合条件的数据
+     *
+     * @param prefix    前缀
+     * @param keyword   关键词
+     * @param start     起始位置
+     * @param size      数量
+     * @param sortType  排序类型
+     * @return 符合条件的数据列表
      */
     @Override
     public List<String> searchData(String prefix, String keyword, int start, int size, boolean sortType) {
@@ -327,5 +392,4 @@ public class TokenDaoRedis implements SaTokenDao {
         List<String> list = new ArrayList<>(keys);
         return SaFoxUtil.searchList(list, start, size, sortType);
     }
-
 }

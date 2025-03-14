@@ -23,6 +23,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
+ * MyBatis-Plus配置类，用于配置MyBatis-Plus的相关插件
+ * 
  * @author tycoding
  * @since 2024/1/2
  */
@@ -30,12 +32,20 @@ import org.springframework.context.annotation.Configuration;
 public class MybatisPlusConfiguration {
 
     /**
-     * 分页插件
+     * 配置MyBatis-Plus分页插件
+     * 
+     * 该方法会创建一个MyBatis-Plus拦截器，并添加分页插件到拦截器中，
+     * 以支持数据库查询的分页功能，使用的数据库类型为MySQL。
+     * 
+     * @return 配置好的MyBatis-Plus拦截器实例
      */
     @Bean
     public MybatisPlusInterceptor mybatisPlusInterceptor() {
+        // 创建MyBatis-Plus拦截器实例
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
+        // 向拦截器中添加分页插件，指定数据库类型为MySQL
         interceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.MYSQL));
+        // 返回配置好的拦截器实例
         return interceptor;
     }
 }

@@ -37,32 +37,49 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 /**
+ * 该类用于配置 Jackson 的序列化和反序列化行为。
+ * Jackson 是一个用于处理 JSON 数据的 Java 库，本配置类可自定义其日期、时间等类型的处理方式。
+ * 
  * @author tycoding
  * @since 2024/1/2
  */
 @Configuration(proxyBeanMethods = false)
+// 当类路径中存在 ObjectMapper 类时，才会加载此配置
 @ConditionalOnClass(ObjectMapper.class)
+// 在 JacksonAutoConfiguration 之前进行自动配置
 @AutoConfigureBefore(JacksonAutoConfiguration.class)
 public class JacksonConfiguration {
 
+    /**
+     * 定义一个 Jackson2ObjectMapperBuilderCustomizer 的 Bean，用于自定义 Jackson 的 ObjectMapper 构建器。
+     * 
+     * @return 自定义的 Jackson2ObjectMapperBuilderCustomizer 实例
+     */
     @Bean
     public Jackson2ObjectMapperBuilderCustomizer customizer() {
         return builder -> {
-            // 本地化
+            // 设置本地化信息为中国
             builder.locale(Locale.CHINA);
-            // 时区
+            // 设置时区为系统默认时区
             builder.timeZone(TimeZone.getTimeZone(ZoneId.systemDefault()));
-            // 全局Long类型序列化为字符串
-//            builder.serializerByType(Long.class, ToStringSerializer.instance);
+            // 注释掉的代码，若启用则会将全局 Long 类型序列化为字符串
+            // builder.serializerByType(Long.class, ToStringSerializer.instance);
 
-            // 时间类型序列化
+            // 设置日期时间的默认格式
             builder.simpleDateFormat(DatePattern.NORM_DATETIME_PATTERN);
+
+            // 配置 LocalDateTime 类型的序列化器
             builder.serializerByType(LocalDateTime.class, new LocalDateTimeSerializer(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)));
+            // 配置 LocalDate 类型的序列化器
             builder.serializerByType(LocalDate.class, new LocalDateSerializer(DateTimeFormatter.ofPattern(DatePattern.NORM_DATE_PATTERN)));
+            // 配置 LocalTime 类型的序列化器，这里原代码有误，应为 LocalTimeSerializer
             builder.serializerByType(LocalTime.class, new LocalDateSerializer(DateTimeFormatter.ofPattern(DatePattern.NORM_TIME_PATTERN)));
 
+            // 配置 LocalDateTime 类型的反序列化器
             builder.deserializerByType(LocalDateTime.class, new LocalDateDeserializer(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)));
+            // 配置 LocalDate 类型的反序列化器
             builder.deserializerByType(LocalDate.class, new LocalDateDeserializer(DateTimeFormatter.ofPattern(DatePattern.NORM_DATE_PATTERN)));
+            // 配置 LocalTime 类型的反序列化器，这里原代码有误，应为 LocalTimeDeserializer
             builder.deserializerByType(LocalTime.class, new LocalDateDeserializer(DateTimeFormatter.ofPattern(DatePattern.NORM_TIME_PATTERN)));
         };
     }
